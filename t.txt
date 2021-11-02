@@ -1,0 +1,10 @@
+E->TP
+P->+TP
+P->-TP
+P->@
+T->FQ
+Q->*FQ
+Q->/FQ
+Q->@
+F->(E)
+F->n
