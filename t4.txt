@@ -1,0 +1,11 @@
+A->aBbDe
+A->d
+B->CAD
+B->e
+C->ABc
+C->dE
+C->@
+D->Ae
+D->@
+E->dE
+E->@

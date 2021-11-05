@@ -14,10 +14,9 @@ vector <string> ter;//终结符
 
 map <string,set<string> > first;//first集
 map <string,set<string> > follow;//follow集
-map <string,set<string> > fir;//first集
-map <string,set<string> > fol;//follow集
 pair <string,string> table[30][20];//预测分析表
 vector <string> stack;//预测分析栈
+
 class BuildSet
 {
 public:
@@ -56,6 +55,7 @@ public:
         int pos=0;
         for(auto i=grammar.begin();i!=grammar.end();i++)//每个产生式
         {
+            pos=0;
             if(i->first==a)//产生式左部为所求非终结符
             {
                 while(pos<i->second.size())
@@ -114,17 +114,136 @@ public:
     }
     void buildfollowset()
     {
+        multimap <string,string> tran;//记录follow集加入动作
         for(int i=0;i<nonter.size();i++)
         {
-            fol.insert(pair<string,set<string> >(nonter[i],{}));
+            follow.insert(pair<string,set<string> >(nonter[i],{}));
             if(i==0)
             {
-                auto j=fol.begin();
+                auto j=follow.begin();
                 j->second.insert("$");//初始符号添加"$"
             }
-            
         }
-        
+        int pos=0;//生成式右部遍历指针
+        for(auto it=grammar.begin();it!=grammar.end();it++)
+        {
+            pos=0;
+            while(pos<it->second.size())
+            {
+                char x=it->second.at(pos);
+                string y=it->second.substr(pos,1);
+                if(x<'A'||x>'Z')//为终结符
+                {
+                    pos++;
+                    continue;
+                }
+                else//非终结符
+                {
+                    int tem=pos+1;
+                    if(tem<it->second.size())
+                    {
+                        string y1;
+                        while(tem<it->second.size())
+                        {
+                            bool fl=false;
+                            char x1=it->second.at(tem);
+                            y1=it->second.substr(tem,1);
+                            if(x1<'A'||x1>'Z')//下一个字符是终结符
+                            {
+                                for(auto yu=follow.begin();yu!=follow.end();yu++)
+                                {
+                                    if(y==yu->first)
+                                    {
+                                        yu->second.insert(y1);
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
+                            else//非终结符
+                            {
+                                auto mn=follow.begin();
+                                auto yp=first.begin();
+                                for(mn=follow.begin();mn!=follow.end();mn++)
+                                {
+                                    if(y==mn->first)
+                                    {
+                                        break;
+                                    }
+                                }
+                                for(yp=first.begin();yp!=first.end();yp++)
+                                {
+                                    if(yp->first==y1)
+                                    {
+                                        break;
+                                    }
+                                }
+                                for(auto rt=yp->second.begin();rt!=yp->second.end();rt++)
+                                {
+                                    if(*rt!="@")
+                                    {
+                                        mn->second.insert(*rt);//first集加入follow集
+                                    }
+                                    else
+                                    {
+                                        fl=true;
+                                    }
+                                }
+                                if(fl==false)//first集中不存在空
+                                {
+                                    break;
+                                }
+                            }
+                            tem++;
+                        }
+                        if(tem==it->second.size())
+                        {
+                            tran.insert(pair<string,string>{it->first,y});
+                        }
+                    }
+                    else
+                    {
+                        tran.insert(pair<string,string>{it->first,y});//记录生成式左部的follow集加入右部最后非终结符
+                    }
+                }
+                pos++;
+            }
+        }
+        for(auto q=tran.begin();q!=tran.end();q++)
+        {
+            if(q->first==q->second)
+            {
+                tran.erase(q);
+            }
+        }
+        while(tran.size()>0)//按照存储的动作将相应follow集加入
+        {
+            set<string> temp;
+            for(auto q=tran.begin();q!=tran.end();q++)
+            {
+                temp.insert(q->second);
+            }
+            for(auto q=tran.begin();q!=tran.end();q++)
+            {
+                if(temp.find(q->first)==temp.end())
+                {
+                    auto hg=follow.find(q->first);
+                    auto bn=follow.find(q->second);
+                    bn->second.insert(hg->second.begin(),hg->second.end());//加入follow集
+                    tran.erase(q);
+                }
+            }
+        }
+        cout << "FOLLOW:" << endl;
+        for(auto it=follow.begin();it!=follow.end();it++)//输出follow集
+        {
+            cout << it->first << ":";
+            for(auto ti=it->second.begin();ti!=it->second.end();ti++)
+            {
+                cout << *ti << " ";
+            }
+            cout << endl;
+        }
     }
 };
 class BuildTable
@@ -143,8 +262,8 @@ public:
                 grammar.insert({temp1,temp2});
                 bool flag=false;
                 for(auto i=nonter.begin();i!=nonter.end();i++)
-                {
-                    if(*i==temp1)
+                 {
+                     if(*i==temp1)
                     {
                         flag=true;
                         break;
@@ -178,16 +297,7 @@ public:
             
         }
         ter.push_back("$");
-        // first.insert(pair<string,set<string> >("E",{"(","n"}));
-        // first.insert(pair<string,set<string> >("P",{"+","-","@"}));
-        // first.insert(pair<string,set<string> >("T",{"(","n"}));
-        // first.insert(pair<string,set<string> >("Q",{"*","/","@"}));
-        // first.insert(pair<string,set<string> >("F",{"(","n"}));
-        follow.insert(pair<string,set<string> >("E",{"$",")"}));
-        follow.insert(pair<string,set<string> >("P",{"$",")"}));
-        follow.insert(pair<string,set<string> >("T",{"$",")","+","-"}));
-        follow.insert(pair<string,set<string> >("Q",{"$",")","+","-"}));
-        follow.insert(pair<string,set<string> >("F",{"$",")","+","-","*","/"}));
+        fin.close();
     }
     void bt()//构建预测分析表
     {
@@ -278,7 +388,10 @@ public:
                                     if(ter[k]==*io)
                                     {
                                         tabley=k;
-                                        table[tablex][tabley]={it->first,it->second};
+                                        if(table[tablex][tabley].first=="")
+                                        {
+                                            table[tablex][tabley]={it->first,it->second};                                            
+                                        }
                                         break;
                                     }
                                 }
@@ -475,16 +588,15 @@ int main()
     // cout << "请输入进行语法分析的文法" << endl;
     // cin >> str;
     // str+=".txt";
-    str="t.txt";
+    str="t2.txt";
     buildtable.input(str);
     buildset.buildfirstset();
+    buildset.buildfollowset();
     buildtable.bt();
     buildtable.outputtable();
     // cout << "请输入进行语法分析的符号串" << endl;
     // cin >> str;
-    str="n+n-(n*n/n)";
+    str="101";
     predict.predict(str);
-    
-    //buildtable.output();
     return 0;
 }

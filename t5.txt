@@ -1,0 +1,8 @@
+A->BC
+B->Ea
+B->@
+C->cD
+D->aBED
+D->@
+E->b
+E->@
