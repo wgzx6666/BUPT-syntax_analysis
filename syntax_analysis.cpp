@@ -43,15 +43,8 @@ public:
     }
     void ergodic(string a)
     {
-        auto er=first.begin();
+        auto er=first.find(a);
         bool flag=false;
-        for(er=first.begin();;er++)
-        {
-            if(er->first==a)
-            {
-                break;
-            }
-        }
         int pos=0;
         for(auto i=grammar.begin();i!=grammar.end();i++)//每个产生式
         {
@@ -588,7 +581,7 @@ int main()
     // cout << "请输入进行语法分析的文法" << endl;
     // cin >> str;
     // str+=".txt";
-    str="t2.txt";
+    str="t1.txt";
     buildtable.input(str);
     buildset.buildfirstset();
     buildset.buildfollowset();
@@ -596,7 +589,7 @@ int main()
     buildtable.outputtable();
     // cout << "请输入进行语法分析的符号串" << endl;
     // cin >> str;
-    str="101";
+    str="n+n-n*(n/n)";
     predict.predict(str);
     return 0;
 }
