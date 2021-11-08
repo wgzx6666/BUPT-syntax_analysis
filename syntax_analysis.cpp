@@ -578,18 +578,15 @@ int main()
     BuildSet buildset;
     BuildTable buildtable;
     Predict predict;
-    // cout << "请输入进行语法分析的文法" << endl;
-    // cin >> str;
-    // str+=".txt";
-    str="t1.txt";
+    cout << "请输入进行语法分析的文法" << endl;
+    cin >> str;
     buildtable.input(str);
     buildset.buildfirstset();
     buildset.buildfollowset();
     buildtable.bt();
     buildtable.outputtable();
-    // cout << "请输入进行语法分析的符号串" << endl;
-    // cin >> str;
-    str="n+n-n*(n/n)";
+    cout << "请输入进行语法分析的符号串" << endl;
+    cin >> str;
     predict.predict(str);
     return 0;
 }
